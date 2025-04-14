@@ -1,12 +1,12 @@
 from flask import Flask, render_template, Response, jsonify, request
 import cv2
 import numpy as np
-import face_recognition
 import pickle
 import os
 from datetime import datetime
 from dotenv import load_dotenv
 from flask_cors import CORS
+import json
 import csv
 import time
 
@@ -215,16 +215,16 @@ def register_face():
             'aadhar_number': data['aadharNumber']
         }
         
-        # Save to pickle file
-        faces_file = os.path.join(DATABASE_PATH, 'faces_data.pkl')
+        # Save to JSON file instead of pickle
+        faces_file = os.path.join(DATABASE_PATH, 'faces_data.json')
         faces = []
         if os.path.exists(faces_file):
-            with open(faces_file, 'rb') as f:
-                faces = pickle.load(f)
+            with open(faces_file, 'r') as f:
+                faces = json.load(f)
         
         faces.append(face_data)
-        with open(faces_file, 'wb') as f:
-            pickle.dump(faces, f)
+        with open(faces_file, 'w') as f:
+            json.dump(faces, f)
 
         return jsonify({'success': True})
     except Exception as e:
@@ -238,12 +238,12 @@ def verify_face():
 
     try:
         # Load saved face data
-        faces_file = os.path.join(DATABASE_PATH, 'faces_data.pkl')
+        faces_file = os.path.join(DATABASE_PATH, 'faces_data.json')
         if not os.path.exists(faces_file):
             return jsonify({'error': 'No registered faces found'}), 404
 
-        with open(faces_file, 'rb') as f:
-            faces = pickle.load(f)
+        with open(faces_file, 'r') as f:
+            faces = json.load(f)
 
         # Convert input descriptor to numpy array
         input_descriptor = np.array(data['descriptor'])
