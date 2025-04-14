@@ -304,46 +304,45 @@ body {
 }
 
 .webcam-container {
+    position: relative;
     width: 100%;
     max-width: 640px;
     margin: 0 auto;
-    position: relative;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-#webcam-placeholder, #reg-webcam-placeholder {
-    width: 100%;
-    aspect-ratio: 4/3;
-    background-color: #f0f0f0;
-    position: relative;
+    background: #f5f5f5;
+    border-radius: 8px;
     overflow: hidden;
 }
 
-.webcam-feed {
+video {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
+    display: block;
 }
 
-.face-detection-overlay {
+.face-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    border: 2px solid transparent;
-    pointer-events: none;
 }
 
-.status-message {
+.webcam-status {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
     text-align: center;
-    padding: 1rem;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    font-weight: 500;
+    font-size: 14px;
+}
+
+.detection-box {
+    position: absolute;
+    border: 2px solid #00ff00;
+    background: rgba(0, 255, 0, 0.1);
 }
 
 .voting-controls, .registration-controls {

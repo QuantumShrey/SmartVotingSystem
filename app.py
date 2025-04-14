@@ -8,6 +8,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 from win32com.client import Dispatch
 from flask_cors import CORS
+import csv
+import time
 
 # Load environment variables
 load_dotenv()
@@ -202,6 +204,68 @@ def video_feed():
 def cleanup():
     release_video()
     return jsonify({"status": "success"})
+
+@app.route('/register_face', methods=['POST'])
+def register_face():
+    data = request.json
+    if not data or 'descriptor' not in data or 'aadharNumber' not in data:
+        return jsonify({'error': 'Invalid data'}), 400
+
+    try:
+        # Save face descriptor and Aadhar number
+        face_data = {
+            'descriptor': data['descriptor'],
+            'aadhar_number': data['aadharNumber']
+        }
+        
+        # Save to pickle file
+        faces_file = os.path.join(DATABASE_PATH, 'faces_data.pkl')
+        faces = []
+        if os.path.exists(faces_file):
+            with open(faces_file, 'rb') as f:
+                faces = pickle.load(f)
+        
+        faces.append(face_data)
+        with open(faces_file, 'wb') as f:
+            pickle.dump(faces, f)
+
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/verify_face', methods=['POST'])
+def verify_face():
+    data = request.json
+    if not data or 'descriptor' not in data:
+        return jsonify({'error': 'Invalid data'}), 400
+
+    try:
+        # Load saved face data
+        faces_file = os.path.join(DATABASE_PATH, 'faces_data.pkl')
+        if not os.path.exists(faces_file):
+            return jsonify({'error': 'No registered faces found'}), 404
+
+        with open(faces_file, 'rb') as f:
+            faces = pickle.load(f)
+
+        # Convert input descriptor to numpy array
+        input_descriptor = np.array(data['descriptor'])
+
+        # Compare with saved faces
+        for face in faces:
+            saved_descriptor = np.array(face['descriptor'])
+            distance = np.linalg.norm(input_descriptor - saved_descriptor)
+            
+            # If distance is less than threshold, consider it a match
+            if distance < 0.6:  # Adjust threshold as needed
+                return jsonify({
+                    'success': True,
+                    'aadhar_number': face['aadhar_number']
+                })
+
+        return jsonify({'success': False, 'error': 'No matching face found'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
