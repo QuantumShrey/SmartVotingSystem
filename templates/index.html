@@ -4,20 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Voting System</title>
-    <!-- Face API -->
-    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <script>
-        // Load models from CDN
-        const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
-        Promise.all([
-            faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-        ]).then(() => {
-            console.log('Face detection models loaded');
-        });
+        // Function to start webcam
+        async function startWebcam() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('video-feed');
+                video.srcObject = stream;
+            } catch (err) {
+                console.error('Error accessing webcam:', err);
+            }
+        }
+
+        // Start webcam when page loads
+        document.addEventListener('DOMContentLoaded', startWebcam);
     </script>
-    <script defer src="{{ url_for('static', filename='face-recognition.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
@@ -90,8 +91,7 @@
             <div class="section hidden" id="vote-section">
                 <div class="voting-section">
                     <div class="webcam-container">
-                        <video id="video-feed" autoplay muted playsinline></video>
-                        <canvas id="face-overlay" class="face-overlay"></canvas>
+                        <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed">
                         <div id="webcam-status" class="webcam-status"></div>
                     </div>
 

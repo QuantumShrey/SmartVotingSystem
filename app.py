@@ -1,12 +1,12 @@
 from flask import Flask, render_template, Response, jsonify, request
 import cv2
 import numpy as np
+import face_recognition
 import pickle
 import os
 from datetime import datetime
 from dotenv import load_dotenv
 from flask_cors import CORS
-import json
 import csv
 import time
 
@@ -44,6 +44,38 @@ def release_video():
     if video:
         video.release()
         video = None
+
+def generate_frames():
+    while True:
+        video = get_video_capture()
+        if not video:
+            break
+            
+        success, frame = video.read()
+        if not success:
+            break
+        else:
+            # Convert frame to RGB for face recognition
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            
+            # Detect faces
+            face_locations = face_recognition.face_locations(rgb_frame)
+            
+            # Draw rectangles around faces
+            for (top, right, bottom, left) in face_locations:
+                cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
+            
+            # Convert frame to jpg
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/')
 def home():
@@ -205,26 +237,48 @@ def cleanup():
 @app.route('/register_face', methods=['POST'])
 def register_face():
     data = request.json
-    if not data or 'descriptor' not in data or 'aadharNumber' not in data:
+    if not data or 'aadharNumber' not in data:
         return jsonify({'error': 'Invalid data'}), 400
 
     try:
-        # Save face descriptor and Aadhar number
+        video = get_video_capture()
+        if not video:
+            return jsonify({'error': 'Camera not available'}), 500
+
+        # Capture frame and detect face
+        ret, frame = video.read()
+        if not ret:
+            return jsonify({'error': 'Failed to capture image'}), 500
+
+        # Convert BGR to RGB
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        
+        # Find face locations
+        face_locations = face_recognition.face_locations(rgb_frame)
+        if not face_locations:
+            return jsonify({'error': 'No face detected'}), 400
+
+        # Get face encodings
+        face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+        if not face_encodings:
+            return jsonify({'error': 'Could not encode face'}), 400
+
+        # Save face encoding and Aadhar number
         face_data = {
-            'descriptor': data['descriptor'],
+            'encoding': face_encodings[0].tolist(),
             'aadhar_number': data['aadharNumber']
         }
         
-        # Save to JSON file instead of pickle
-        faces_file = os.path.join(DATABASE_PATH, 'faces_data.json')
+        # Save to pickle file
+        faces_file = os.path.join(DATABASE_PATH, 'faces_data.pkl')
         faces = []
         if os.path.exists(faces_file):
-            with open(faces_file, 'r') as f:
-                faces = json.load(f)
+            with open(faces_file, 'rb') as f:
+                faces = pickle.load(f)
         
         faces.append(face_data)
-        with open(faces_file, 'w') as f:
-            json.dump(faces, f)
+        with open(faces_file, 'wb') as f:
+            pickle.dump(faces, f)
 
         return jsonify({'success': True})
     except Exception as e:
@@ -232,29 +286,43 @@ def register_face():
 
 @app.route('/verify_face', methods=['POST'])
 def verify_face():
-    data = request.json
-    if not data or 'descriptor' not in data:
-        return jsonify({'error': 'Invalid data'}), 400
-
     try:
+        video = get_video_capture()
+        if not video:
+            return jsonify({'error': 'Camera not available'}), 500
+
+        # Capture frame and detect face
+        ret, frame = video.read()
+        if not ret:
+            return jsonify({'error': 'Failed to capture image'}), 500
+
+        # Convert BGR to RGB
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        
+        # Find face locations
+        face_locations = face_recognition.face_locations(rgb_frame)
+        if not face_locations:
+            return jsonify({'error': 'No face detected'}), 400
+
+        # Get face encodings
+        face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+        if not face_encodings:
+            return jsonify({'error': 'Could not encode face'}), 400
+
         # Load saved face data
-        faces_file = os.path.join(DATABASE_PATH, 'faces_data.json')
+        faces_file = os.path.join(DATABASE_PATH, 'faces_data.pkl')
         if not os.path.exists(faces_file):
             return jsonify({'error': 'No registered faces found'}), 404
 
-        with open(faces_file, 'r') as f:
-            faces = json.load(f)
-
-        # Convert input descriptor to numpy array
-        input_descriptor = np.array(data['descriptor'])
+        with open(faces_file, 'rb') as f:
+            faces = pickle.load(f)
 
         # Compare with saved faces
         for face in faces:
-            saved_descriptor = np.array(face['descriptor'])
-            distance = np.linalg.norm(input_descriptor - saved_descriptor)
+            saved_encoding = np.array(face['encoding'])
+            matches = face_recognition.compare_faces([saved_encoding], face_encodings[0], tolerance=0.6)
             
-            # If distance is less than threshold, consider it a match
-            if distance < 0.6:  # Adjust threshold as needed
+            if matches[0]:
                 return jsonify({
                     'success': True,
                     'aadhar_number': face['aadhar_number']
