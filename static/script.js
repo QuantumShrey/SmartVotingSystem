@@ -60,6 +60,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Video feed functions
+    function startVideo() {
+        const videoFeed = document.getElementById('video-feed');
+        if (videoFeed) {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                videoFeed.src = '/video_feed';
+            } else {
+                // In production, show a message about webcam limitations
+                const webcamContainer = document.querySelector('.webcam-container');
+                if (webcamContainer) {
+                    webcamContainer.innerHTML = `
+                        <div class="alert alert-info">
+                            <h4>Webcam Access Limited</h4>
+                            <p>For security reasons, webcam access is only available when running the application locally.</p>
+                            <p>Please download and run the application locally to use facial recognition features.</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+    }
+
     // Handle keyboard events for voting
     document.addEventListener('keydown', async (event) => {
         // Only process key events when vote section is visible

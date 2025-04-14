@@ -1,21 +1,40 @@
-from flask import Flask, render_template, jsonify, request, Response
+from flask import Flask, render_template, Response, jsonify, request
 import cv2
-import pickle
 import numpy as np
+import face_recognition
+import pickle
 import os
-import csv
-import time
 from datetime import datetime
+from dotenv import load_dotenv
 from win32com.client import Dispatch
 from flask_cors import CORS
 
+# Load environment variables
+load_dotenv()
+
+# Environment configuration
+ENV = os.getenv('FLASK_ENV', 'development')
+DEBUG = ENV == 'development'
+SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-here')
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///votes.db')
+
 app = Flask(__name__)
+app.config['SECRET_KEY'] = SECRET_KEY
+
+# Configure database path
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+DATABASE_PATH = os.path.join(BASE_DIR, 'data')
+if not os.path.exists(DATABASE_PATH):
+    os.makedirs(DATABASE_PATH)
 CORS(app)
 
 # Initialize video capture
 video = None
 
 def get_video_capture():
+    if ENV == 'production':
+        # Return a mock camera in production
+        return None
     global video
     if video is None:
         video = cv2.VideoCapture(0)
@@ -185,4 +204,5 @@ def cleanup():
     return jsonify({"status": "success"})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.getenv('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=DEBUG)
