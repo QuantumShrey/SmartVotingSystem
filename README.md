@@ -1,28 +1,26 @@
 # Smart Voting System
 
-A secure and modern voting system that uses facial recognition for voter verification. Built with Flask, OpenCV, and face-recognition libraries.
+A secure face recognition-based voting system built with Python Flask and OpenCV.
 
 ## Features
 
-- Face Recognition for voter verification
-- Real-time webcam integration
-- Multiple political party options
-- Secure voting process
+- Face recognition-based voter registration
+- Secure voting process with face verification
+- Real-time video feed for registration and voting
 - User-friendly interface
-- Registration system with Aadhar number
+- Vote tracking and duplicate vote prevention
 
-## Tech Stack
+## Prerequisites
 
-- Backend: Python, Flask
-- Frontend: HTML, CSS, JavaScript
-- Face Recognition: OpenCV, face-recognition
-- Database: CSV file system
+- Python 3.8 or higher
+- Webcam
+- Required Python packages (see requirements.txt)
 
 ## Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/SmartVotingSystem.git
+git clone https://github.com/adarshyadav0906/SmartVotingSystem.git
 cd SmartVotingSystem
 ```
 
@@ -31,29 +29,46 @@ cd SmartVotingSystem
 pip install -r requirements.txt
 ```
 
-3. Run the application:
+3. Create necessary directories:
 ```bash
-python app.py
+mkdir data
 ```
 
 ## Usage
 
-1. Register as a voter:
-   - Go to the Registration section
-   - Enter your Aadhar number
-   - Complete the face registration process
+1. Start the server:
+```bash
+python app.py
+```
 
-2. Cast your vote:
-   - Go to the Voting section
-   - Look at the camera for face verification
-   - Select your preferred party
+2. Open a web browser and navigate to:
+```
+http://localhost:5000
+```
 
-## Team
+3. Register as a voter:
+   - Click on "Register" in the navigation
+   - Enter your 12-digit Aadhar number
+   - Look at the camera and follow the instructions
+   - Wait for registration confirmation
 
-- Piyush Bhavsar
-- Shubham Yadav
-- Vinayak Shukla
+4. Cast your vote:
+   - Click on "Vote" in the navigation
+   - Look at the camera for verification
+   - Press the number key (1-4) corresponding to your choice
+   - Wait for vote confirmation
+
+## Security Features
+
+- Face recognition for voter verification
+- One vote per registered voter
+- Secure storage of voter data
+- Real-time face detection and verification
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 ## License
 
-MIT License
+[MIT](https://choosealicense.com/licenses/mit/)

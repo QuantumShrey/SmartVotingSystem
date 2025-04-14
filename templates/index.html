@@ -4,21 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Voting System</title>
-    <script>
-        // Function to start webcam
-        async function startWebcam() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                const video = document.getElementById('video-feed');
-                video.srcObject = stream;
-            } catch (err) {
-                console.error('Error accessing webcam:', err);
-            }
-        }
 
-        // Start webcam when page loads
-        document.addEventListener('DOMContentLoaded', startWebcam);
-    </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
@@ -91,7 +77,7 @@
             <div class="section hidden" id="vote-section">
                 <div class="voting-section">
                     <div class="webcam-container">
-                        <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed">
+                        <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed" style="width: 640px; height: 480px;">
                         <div id="webcam-status" class="webcam-status"></div>
                     </div>
 
@@ -140,8 +126,7 @@
             <div class="section hidden" id="register-section">
                 <div class="registration-section">
                     <div class="webcam-container">
-                        <video id="reg-video-feed" autoplay muted playsinline></video>
-                        <canvas id="reg-face-overlay" class="face-overlay"></canvas>
+                        <img id="reg-video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed" style="width: 640px; height: 480px;">
                         <div id="reg-webcam-status" class="webcam-status"></div>
                     </div>
 
@@ -237,5 +222,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
 </html>

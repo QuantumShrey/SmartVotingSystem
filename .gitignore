@@ -32,15 +32,14 @@ ENV/
 *.swo
 
 # Project specific
-faces_encodings/
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.svg
-*.mp4
-*.avi
-*.csv
-
-# Environment variables
+data/
+*.pkl
+Votes.csv
 .env
+
+# Logs
+*.log
+
+# System Files
+.DS_Store
+Thumbs.db

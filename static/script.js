@@ -2,16 +2,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_URL = 'http://localhost:5000/api';
     
     // Navigation elements
-    const homeSection = document.getElementById('home-section');
-    const voteSection = document.getElementById('vote-section');
-    const registerSection = document.getElementById('register-section');
-    const helpSection = document.getElementById('help-section');
-    const contactSection = document.getElementById('contact-section');
-    const homeSectionBtn = document.getElementById('home-section-btn');
-    const voteSectionBtn = document.getElementById('vote-section-btn');
-    const registerSectionBtn = document.getElementById('register-section-btn');
-    const helpSectionBtn = document.getElementById('help-section-btn');
-    const contactSectionBtn = document.getElementById('contact-section-btn');
+    const sections = {
+        'home': document.getElementById('home-section'),
+        'vote': document.getElementById('vote-section'),
+        'register': document.getElementById('register-section'),
+        'help': document.getElementById('help-section'),
+        'contact': document.getElementById('contact-section')
+    };
+
+    // Navigation buttons
+    const navButtons = {
+        'home': document.getElementById('home-section-btn'),
+        'vote': document.getElementById('vote-section-btn'),
+        'register': document.getElementById('register-section-btn'),
+        'help': document.getElementById('help-section-btn'),
+        'contact': document.getElementById('contact-section-btn')
+    };
 
     // Home page buttons
     const goToRegisterBtn = document.getElementById('go-to-register');
@@ -25,38 +31,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageText = document.getElementById('message-text');
 
     // Function to show sections
-    function showSection(sectionId) {
-        [homeSection, voteSection, registerSection, helpSection, contactSection].forEach(section => {
-            section.classList.add('hidden');
+    function showSection(sectionName) {
+        // Hide all sections
+        Object.values(sections).forEach(section => {
+            if (section) section.classList.add('hidden');
         });
-        document.getElementById(sectionId).classList.remove('hidden');
 
-        // Update active nav link
-        [homeSectionBtn, voteSectionBtn, registerSectionBtn, helpSectionBtn, contactSectionBtn].forEach(btn => {
-            btn.classList.remove('active');
+        // Show the selected section
+        const selectedSection = sections[sectionName];
+        if (selectedSection) {
+            selectedSection.classList.remove('hidden');
+        }
+
+        // Update active nav button
+        Object.values(navButtons).forEach(btn => {
+            if (btn) btn.classList.remove('active');
         });
-        document.querySelector(`[id="${sectionId}-btn"]`).classList.add('active');
+        const activeButton = navButtons[sectionName];
+        if (activeButton) {
+            activeButton.classList.add('active');
+        }
     }
 
-    // Navigation event listeners
-    homeSectionBtn.addEventListener('click', () => showSection('home-section'));
-    voteSectionBtn.addEventListener('click', () => showSection('vote-section'));
-    registerSectionBtn.addEventListener('click', () => showSection('register-section'));
-    helpSectionBtn.addEventListener('click', () => showSection('help-section'));
-    contactSectionBtn.addEventListener('click', () => showSection('contact-section'));
+    // Add click event listeners to navigation buttons
+    Object.entries(navButtons).forEach(([sectionName, button]) => {
+        if (button) {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection(sectionName);
+            });
+        }
+    });
 
     // Home page button listeners
-    goToRegisterBtn.addEventListener('click', () => showSection('register-section'));
-    goToVoteBtn.addEventListener('click', () => showSection('vote-section'));
+    if (goToRegisterBtn) {
+        goToRegisterBtn.addEventListener('click', () => showSection('register'));
+    }
+    if (goToVoteBtn) {
+        goToVoteBtn.addEventListener('click', () => showSection('vote'));
+    }
 
     // Function to show message overlay
     function showMessage(message, duration = 3000) {
-        messageText.textContent = message;
-        messageOverlay.style.display = 'flex';
-        if (duration > 0) {
-            setTimeout(() => {
-                messageOverlay.style.display = 'none';
-            }, duration);
+        if (messageText && messageOverlay) {
+            messageText.textContent = message;
+            messageOverlay.style.display = 'flex';
+            if (duration > 0) {
+                setTimeout(() => {
+                    messageOverlay.style.display = 'none';
+                }, duration);
+            }
         }
     }
 
@@ -85,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle keyboard events for voting
     document.addEventListener('keydown', async (event) => {
         // Only process key events when vote section is visible
-        if (!voteSection.classList.contains('hidden')) {
+        if (!sections['vote'].classList.contains('hidden')) {
             const key = event.key;
             let party;
             switch(key) {
@@ -164,10 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            updateRegStatus('Starting face registration...');
-            registrationStatus.textContent = 'Please look at the camera and wait for the registration process to complete.';
+            registrationStatus.textContent = 'Starting registration... Please look at the camera.';
             startRegistrationBtn.disabled = true;
-            showMessage('Registration in progress... Please wait', 0);
 
             const response = await fetch(`${API_URL}/start-registration`, {
                 method: 'POST',
@@ -176,22 +198,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({ aadhar })
             });
+
             const data = await response.json();
 
-            if (data.status === 'success') {
-                showMessage(data.message, 5000);
+            if (data.success) {
+                showMessage('Registration successful!', 5000);
                 registrationStatus.textContent = 'Registration completed successfully!';
-                // Clean up video capture
-                await fetch(`${API_URL}/cleanup`, {
-                    method: 'POST'
-                });
+                // Reset form
+                aadharInput.value = '';
             } else {
-                showMessage(data.message, 3000);
-                registrationStatus.textContent = 'Registration failed. Please try again.';
+                showMessage(data.error || 'Registration failed. Please try again.', 3000);
+                registrationStatus.textContent = data.error || 'Registration failed. Please try again.';
             }
         } catch (error) {
+            console.error('Registration error:', error);
             showMessage('Error during registration. Please try again.', 3000);
-            console.error('Error:', error);
+            registrationStatus.textContent = 'Registration failed. Please try again.';
         } finally {
             startRegistrationBtn.disabled = false;
         }
