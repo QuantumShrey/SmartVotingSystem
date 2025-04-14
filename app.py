@@ -6,7 +6,6 @@ import pickle
 import os
 from datetime import datetime
 from dotenv import load_dotenv
-from win32com.client import Dispatch
 from flask_cors import CORS
 import csv
 import time
@@ -18,24 +17,22 @@ load_dotenv()
 ENV = os.getenv('FLASK_ENV', 'development')
 DEBUG = ENV == 'development'
 SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-here')
-DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///votes.db')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
+CORS(app)
 
 # Configure database path
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASE_PATH = os.path.join(BASE_DIR, 'data')
 if not os.path.exists(DATABASE_PATH):
     os.makedirs(DATABASE_PATH)
-CORS(app)
 
 # Initialize video capture
 video = None
 
 def get_video_capture():
     if ENV == 'production':
-        # Return a mock camera in production
         return None
     global video
     if video is None:
@@ -44,7 +41,7 @@ def get_video_capture():
 
 def release_video():
     global video
-    if video is not None:
+    if video:
         video.release()
         video = None
 
