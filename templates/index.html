@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Election System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='main logo.png') }}" alt="Smart Election Logo" class="logo-img">
+                <h1>Smart Election System</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="active" id="home-section-btn">Home</a></li>
+                <li><a href="#" id="vote-section-btn">Vote</a></li>
+                <li><a href="#" id="register-section-btn">Register</a></li>
+                <li><a href="#" id="help-section-btn">Help</a></li>
+                <li><a href="#" id="contact-section-btn">Contact Us</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Home Section -->
+            <div class="section" id="home-section">
+                <div class="hero-section">
+                    <h1>Welcome to Smart Election System</h1>
+                    <p class="hero-text">Exercise your right to vote securely with our advanced face recognition system</p>
+                    
+                    <div class="feature-cards">
+                        <div class="feature-card register-card" id="go-to-register">
+                            <div class="card-icon">👤</div>
+                            <h2>New Voter?</h2>
+                            <p>Register yourself with Aadhar and face verification</p>
+                            <button class="feature-btn">Register Now</button>
+                        </div>
+                        
+                        <div class="feature-card vote-card" id="go-to-vote">
+                            <div class="card-icon">🗳️</div>
+                            <h2>Ready to Vote?</h2>
+                            <p>Cast your vote securely with face verification</p>
+                            <button class="feature-btn">Vote Now</button>
+                        </div>
+                    </div>
+
+                    <div class="process-steps">
+                        <h2>How It Works</h2>
+                        <div class="steps">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <p>Register with Aadhar</p>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <p>Complete Face Registration</p>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <p>Verify Your Face</p>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">4</div>
+                                <p>Cast Your Vote</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voting Section -->
+            <div class="section hidden" id="vote-section">
+                <div class="voting-section">
+                    <div class="webcam-container">
+                        <div id="webcam-placeholder">
+                            <img src="{{ url_for('video_feed') }}" alt="Webcam Feed" class="webcam-feed">
+                            <div id="face-overlay" class="face-detection-overlay"></div>
+                        </div>
+                        <div class="status-message" id="status-message">
+                            Please look at the camera for verification
+                        </div>
+                    </div>
+
+                    <div class="voting-controls" id="voting-controls">
+                        <h2>Cast Your Vote</h2>
+                        <p class="instruction">After face verification, press the number key for your choice:</p>
+                        
+                        <div class="voting-options">
+                            <div class="vote-option">
+                                <div class="party-card">
+                                    <span class="key-press">Press 1</span>
+                                    <img src="{{ url_for('static', filename='bjp.jpg') }}" alt="BJP Symbol" class="party-symbol">
+                                    <h3>BJP</h3>
+                                </div>
+                            </div>
+                            
+                            <div class="vote-option">
+                                <div class="party-card">
+                                    <span class="key-press">Press 2</span>
+                                    <img src="{{ url_for('static', filename='congress.png') }}" alt="Congress Symbol" class="party-symbol">
+                                    <h3>Congress</h3>
+                                </div>
+                            </div>
+
+                            <div class="vote-option">
+                                <div class="party-card">
+                                    <span class="key-press">Press 3</span>
+                                    <img src="{{ url_for('static', filename='AAP.png') }}" alt="AAP Symbol" class="party-symbol">
+                                    <h3>AAP</h3>
+                                </div>
+                            </div>
+
+                            <div class="vote-option">
+                                <div class="party-card">
+                                    <span class="key-press">Press 4</span>
+                                    <img src="{{ url_for('static', filename='NOTA.png') }}" alt="NOTA Symbol" class="party-symbol">
+                                    <h3>NOTA</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registration Section -->
+            <div class="section hidden" id="register-section">
+                <div class="registration-section">
+                    <div class="webcam-container">
+                        <div id="reg-webcam-placeholder">
+                            <img src="{{ url_for('video_feed') }}" alt="Registration Webcam Feed" class="webcam-feed">
+                            <div id="reg-face-overlay" class="face-detection-overlay"></div>
+                        </div>
+                        <div class="status-message" id="reg-status-message">
+                            Please look at the camera to register your face
+                        </div>
+                    </div>
+
+                    <div class="registration-controls">
+                        <h2>Voter Registration</h2>
+                        <div class="registration-form">
+                            <div class="form-group">
+                                <label for="aadhar">Aadhar Number:</label>
+                                <input type="text" id="aadhar" name="aadhar" pattern="[0-9]{12}" maxlength="12" required>
+                            </div>
+                            <button id="start-registration" class="primary-button">Start Registration</button>
+                            <p class="registration-status" id="registration-status"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="section hidden" id="help-section">
+                <div class="help-content">
+                    <h2>How to Vote</h2>
+                    <ol>
+                        <li>Make sure you are registered in the system with your Aadhar number</li>
+                        <li>Go to the Vote section and look at the camera</li>
+                        <li>The system will verify your face</li>
+                        <li>Once verified, press 1 for BJP, 2 for Congress, 3 for AAP, or 4 for NOTA to cast your vote</li>
+                        <li>Wait for the confirmation message</li>
+                    </ol>
+
+                    <h2>How to Register</h2>
+                    <ol>
+                        <li>Go to the Register section</li>
+                        <li>Enter your 12-digit Aadhar number</li>
+                        <li>Click "Start Registration" and look at the camera</li>
+                        <li>The system will capture multiple images of your face</li>
+                        <li>Wait for the registration confirmation</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Contact Section -->
+            <div class="section hidden" id="contact-section">
+                <div class="contact-content">
+                    <h2>Contact Our Team</h2>
+                    <p class="contact-intro">Have questions? Our team is here to help you with any inquiries about the Smart Election System.</p>
+                    
+                    <div class="team-members">
+                        <div class="team-card">
+                            <div class="member-avatar">PB</div>
+                            <h3>Piyush Bhavsar</h3>
+                            <div class="contact-info">
+                                <p><i class="phone-icon">📱</i> +918788568516</p>
+                                <p><i class="email-icon">📧</i> piyushbhavsar@gmail.com</p>
+                            </div>
+                        </div>
+
+                        <div class="team-card">
+                            <div class="member-avatar">SY</div>
+                            <h3>Shubham Yadav</h3>
+                            <div class="contact-info">
+                                <p><i class="phone-icon">📱</i> +917738171379</p>
+                                <p><i class="email-icon">📧</i> shubhamyadav@gmail.com</p>
+                            </div>
+                        </div>
+
+                        <div class="team-card">
+                            <div class="member-avatar">VS</div>
+                            <h3>Vinayak Shukla</h3>
+                            <div class="contact-info">
+                                <p><i class="phone-icon">📱</i> +917499092362</p>
+                                <p><i class="email-icon">📧</i> vinayakshukla@gmail.com</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contact-footer">
+                        <p>Available Monday to Friday, 9:00 AM - 5:00 PM IST</p>
+                        <p>For urgent matters, please call our team members directly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Smart Election System. All rights reserved.</p>
+    </footer>
+
+    <div class="message-overlay" id="message-overlay">
+        <div class="message-content">
+            <p id="message-text"></p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
