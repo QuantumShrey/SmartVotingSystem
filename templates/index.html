@@ -6,6 +6,18 @@
     <title>Smart Voting System</title>
     <!-- Face API -->
     <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script>
+        // Load models from CDN
+        const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+        Promise.all([
+            faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+        ]).then(() => {
+            console.log('Face detection models loaded');
+        });
+    </script>
+    <script defer src="{{ url_for('static', filename='face-recognition.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
